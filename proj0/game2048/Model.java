@@ -106,6 +106,145 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+    private static boolean isempty_line(Board b,int row){
+        for(int c = 0;c<b.size();c++)
+            if(b.tile(c,row)!=null)
+                return false;
+        return true;
+    }
+    private static boolean isempty_col(Board b,int col){
+        for(int r = 0;r<b.size();r++)
+            if(b.tile(col,r)!=null)
+                return false;
+        return true;
+    }
+    public  boolean handler(Board b,Side side){
+        int num = 0;
+        boolean is_changed = false;
+        if(side==Side.WEST){
+            Tile t;
+            for(int r = 0;r<b.size();r++){
+                if(Model.isempty_line(b,r))
+                    continue;
+                else{
+                    int index = 0;
+                    for(int c = 1;c<b.size();c++){
+                        if(b.tile(c,r)==null){
+                         continue;
+                        }
+                        Tile temp;
+                        temp = b.tile(index,r);
+                        t = b.tile(c,r);
+                        if(b.tile(index,r)==null||b.tile(index,r).value()==t.value()){
+                            b.move(index,r,t);
+                            is_changed = true;
+                            if(temp!=null) {
+                                num += b.tile(index,r).value();//todo
+                                index++;
+                            }
+                            continue;
+                        }
+                        index++;
+                        if(index!=r)
+                            is_changed = true;
+                        b.move(index,r,t);
+                    }
+                }
+            }
+        } else if (side==Side.EAST) {
+            Tile t;
+            for(int r = 0;r<b.size();r++){
+                if(Model.isempty_line(b,r))
+                    continue;
+                else{
+                    int index = 3;
+                    for(int c = 2;c>=0;c--){
+                        if(b.tile(c,r)==null){
+                            continue;
+                        }
+                        Tile temp;
+                        temp = b.tile(index,r);
+                        t = b.tile(c,r);
+                        if(b.tile(index,r)==null||b.tile(index,r).value()==t.value()){
+                            b.move(index,r,t);
+                            is_changed = true;
+                            if(temp!=null) {
+                                num += b.tile(index,r).value();//todo
+                                index--;
+                            }
+                            continue;
+                        }
+                        index--;
+                        if(index!=c)
+                            is_changed = true;
+                        b.move(index,r,t);
+                    }
+                }
+            }
+        } else if (side==Side.NORTH) {
+            Tile t;
+            for(int c = 0;c<b.size();c++){
+                if(Model.isempty_col(b,c))
+                    continue;
+                else{
+                    int index = 3;
+                    for(int r = 2;r>=0;r--){
+                        if(b.tile(c,r)==null){
+                            continue;
+                        }
+                        t = b.tile(c,r);
+                        Tile temp;
+                        temp = b.tile(c,index);
+                        if(b.tile(c,index)==null||b.tile(c,index).value()==t.value()){
+                            b.move(c,index,t);
+                            is_changed = true;
+                            if(temp!=null) {
+                                num += b.tile(c,index).value();//todo
+                                index--;
+                            }
+                            continue;
+                        }
+                        index--;
+                        if(index!=r)
+                            is_changed = true;
+                        b.move(c,index,t);
+                    }
+                }
+            }
+        }else{
+            Tile t;
+            for(int c = 0;c<b.size();c++){
+                if(Model.isempty_col(b,c))
+                    continue;
+                else{
+                    int index = 0;
+                    for(int r = 1;r<b.size();r++){
+                        if(b.tile(c,r)==null){
+                            continue;
+                        }
+                        Tile temp;
+                        temp = b.tile(c,index);
+                        t = b.tile(c,r);
+                        if(b.tile(c,index)==null||b.tile(c,index).value()==t.value()){
+                            b.move(c,index,t);
+                            is_changed = true;
+                            if(temp!=null) {
+                                num += b.tile(c,index).value();//todo
+                                index++;
+                            }
+                            continue;
+                        }
+                        index++;
+                        if(index!=r)
+                            is_changed = true;
+                        b.move(c,index,t);
+                    }
+                }
+            }
+        }
+        score += num;
+        return is_changed;
+    }
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -113,7 +252,7 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        changed = this.handler(board,side);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -137,7 +276,13 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+
+        for(int i = 0;i<4;i++){
+            for(int j = 0;j<4;j++){
+                if(b.tile(i,j)==null)
+                    return true;
+            }
+        }
         return false;
     }
 
@@ -147,10 +292,31 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+
+        for(int i = 0;i<4;i++){
+            for(int j = 0;j<4;j++){
+                if(b.tile(i,j)!=null&&b.tile(i,j).value()==2048)
+                    return true;
+            }
+        }
         return false;
     }
-
+    private static boolean myCheck(Board b,int i,int j){
+        if(j!=3&&b.tile(i,j).value()==b.tile(i,j+1).value())
+            return true;
+        if(i!=3&&b.tile(i,j).value()==b.tile(i+1,j).value())
+            return true;
+        return false;
+    }
+    private static boolean atLeastOne(Board b){
+        for(int i = 0;i<4;i++){
+            for(int j =0;j<4;j++){
+                if(Model.myCheck(b,i,j))
+                    return true;
+            }
+        }
+        return false;
+    }
     /**
      * Returns true if there are any valid moves on the board.
      * There are two ways that there can be valid moves:
@@ -159,6 +325,10 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(Model.emptySpaceExists(b))
+            return true;
+        if(Model.atLeastOne(b))
+            return true;
         return false;
     }
 

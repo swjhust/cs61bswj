@@ -1,5 +1,7 @@
 package IntList;
 
+import jh61b.junit.In;
+
 public class IntList {
     public int first;
     public IntList rest;
@@ -63,5 +65,52 @@ public class IntList {
         int[] restList = new int[argList.length - 1];
         System.arraycopy(argList, 1, restList, 0, argList.length - 1);
         return new IntList(argList[0], IntList.of(restList));
+    }
+
+    public static void dSquareList(IntList L){
+        L.first *= L.first;
+        if(L.rest == null)
+            return;
+        IntList.dSquareList(L.rest);
+    }
+
+    public static IntList squareListIterative(IntList L){
+        if(L==null)
+            return null;
+        IntList M = new IntList(L.first * L.first, null);
+        IntList temp = L.rest;
+        IntList temp1 = M;
+        while(temp!=null){
+         temp1.rest = new IntList(temp.first * temp.first, null);
+         temp1 = temp1.rest;
+         temp = temp.rest;
+        }
+        return M;
+    }
+    public static IntList squareListRecursive(IntList L){
+        if(L==null)
+            return null;
+        IntList M = new IntList(L.first * L.first, squareListIterative(L.rest));
+        return M;
+    }
+    public static IntList dcatenate(IntList A, IntList B){
+        IntList conc = new IntList(0, null);
+        IntList mid = A;
+        IntList assign = conc;
+        while(mid!=null){
+            assign.first = mid.first;
+            assign.rest = new IntList(0, null);
+            assign = assign.rest;
+            mid = mid.rest;
+        }
+        mid = B;
+        while(mid!=null){
+            assign.first = mid.first;
+            assign.rest = new IntList(0, null);
+            assign = assign.rest;
+            mid = mid.rest;
+        }
+        assign.rest = null;
+        return conc;
     }
 }
